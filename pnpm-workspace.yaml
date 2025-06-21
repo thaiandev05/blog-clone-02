@@ -1,0 +1,10 @@
+ignoredBuiltDependencies:
+  - '@prisma/engines'
+  - bcrypt
+
+onlyBuiltDependencies:
+  - '@nestjs/core'
+  - '@prisma/client'
+  - '@swc/core'
+  - argon2
+  - prisma

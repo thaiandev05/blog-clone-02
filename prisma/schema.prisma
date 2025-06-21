@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+// Model User đã được chuẩn hóa
+model Users {
+  id       String   @id @default(uuid()) @db.Uuid
+  email    String   @unique
+  password String // Luôn lưu trữ mật khẩu đã được băm (hashed)
+  name     String? // Tên có thể không bắt buộc, nên dùng `String?`
+  role     UserRole @default(USER) // Thêm vai trò để quản lý quyền hạn
+
+  isActive  Boolean   @default(false) // Dùng để xác định tài khoản đã được kích hoạt (ví dụ: qua email) hay chưa
+  deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt // Thêm updatedAt là một practice tốt
+
+  // Quan hệ: Một User có thể có nhiều Session (đăng nhập từ nhiều thiết bị)
+  sessions Session[]
+}
+
+// Model Session được thiết kế lại để chuyên quản lý Refresh Token
+model Session {
+  id        String   @id @default(cuid()) // Dùng CUID hoặc UUID cho ID session
+  token     String?  @db.VarChar(255) // Đây là Refresh Token đã được HASH, không bao giờ lưu token gốc.
+  expiresAt DateTime // Thời gian hết hạn của Refresh Token này.
+
+  userId String @db.Uuid // Khóa ngoại liên kết với User
+  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade) // Khi User bị xóa, Session cũng bị xóa
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @default(now())
+
+  @@index([userId])
+}
