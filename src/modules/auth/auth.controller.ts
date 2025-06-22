@@ -1,8 +1,8 @@
-import { Body, Controller, Delete, Get, Post, Req, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { Users } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
-import { AvailableUserDto } from './auth.dto';
+import { AvailableUserDto, VerifiedEmail, VerifyingUserEmail } from './auth.dto';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { Response } from 'express'
@@ -43,4 +43,18 @@ export class AuthController {
     return await this.authService.logout(req.user, res,session_id)
   }
 
+  @Post('send-verifyingEmail')
+  async sendVerificationEmail(@Body()data: VerifyingUserEmail){
+    return await this.authService.verifyingEmail(data)
+  }
+
+  @Get('verify-email/confirm')
+  async verifiedEmail(@Query()data: VerifiedEmail){
+    return await this.authService.verifiedEmail(data)
+  }
+
+  @Post('reseted-password')
+  async resetPassword(@Body()data: VerifyingUserEmail){
+    return await this.authService.resetedPassword(data)
+  }
 }

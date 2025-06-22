@@ -19,35 +19,61 @@ enum UserRole {
   ADMIN
 }
 
-// Model User đã được chuẩn hóa
+enum VerificationType {
+  VERIFY_EMAIL
+  VERIFY_PHONE
+  RESET_PASSWORD
+  DELETE_ACCOUNT
+}
+
+// Model User đã được chuẩn hóa và tinh gọn
 model Users {
   id       String   @id @default(uuid()) @db.Uuid
   email    String   @unique
   password String // Luôn lưu trữ mật khẩu đã được băm (hashed)
-  name     String? // Tên có thể không bắt buộc, nên dùng `String?`
+  name     String?
+
   role     UserRole @default(USER) // Thêm vai trò để quản lý quyền hạn
-
-  isActive  Boolean   @default(false) // Dùng để xác định tài khoản đã được kích hoạt (ví dụ: qua email) hay chưa
-  deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt // Thêm updatedAt là một practice tốt
-
+  isActive Boolean  @default(false) // Xác định tài khoản đã được kích hoạt hay chưa
+  
   // Quan hệ: Một User có thể có nhiều Session (đăng nhập từ nhiều thiết bị)
-  sessions Session[]
+  sessions         Session[]
+  // Quan hệ: Một User có thể có nhiều mã xác thực (ví dụ: xác thực email, đổi mật khẩu,...)
+  verificationCodes VerificationCode[]
+
+  deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
-// Model Session được thiết kế lại để chuyên quản lý Refresh Token
+// Model Session chuyên quản lý Refresh Token
 model Session {
-  id        String   @id @default(cuid()) // Dùng CUID hoặc UUID cho ID session
-  token     String?  @db.VarChar(255) // Đây là Refresh Token đã được HASH, không bao giờ lưu token gốc.
-  expiresAt DateTime // Thời gian hết hạn của Refresh Token này.
+  id        String   @id @default(cuid())
+  token     String?   @unique // Refresh Token đã được HASH, không bao giờ lưu token gốc.
+  expiresAt DateTime
 
   userId String @db.Uuid // Khóa ngoại liên kết với User
-  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade) // Khi User bị xóa, Session cũng bị xóa
+  user   Users  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-  updateAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt // Sửa lỗi chính tả từ `updateAt`
 
   @@index([userId])
+}
+
+// Model này quản lý tất cả các loại mã xác thực (OTP, link,...)
+// Thay thế cho việc lưu token trực tiếp trong model Users
+model VerificationCode{
+  code      String   @db.VarChar(6) // Mã xác thực (ví dụ: 123456) hoặc một token duy nhất
+  expiresAt DateTime @db.Timestamptz
+  
+  type   VerificationType // Loại xác thực là gì? (xem enum)
+  userId String           @db.Uuid // Liên kết với user nào?
+  user   Users            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @db.Timestamptz
+  // Thiết lập khóa chính phức hợp: Mỗi user chỉ có 1 mã cho 1 loại xác thực tại một thời điểm.
+  // Ví dụ: User "A" chỉ có thể có 1 mã `VERIFY_EMAIL` đang hoạt động.
+  // Điều này giúp việc tạo/cập nhật (upsert) mã rất dễ dàng.
+  @@unique([userId, type], name: "id")
 }

@@ -1,14 +1,19 @@
-import { Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CookieParseOptions } from 'cookie-parser';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { Response } from 'express';
 import { Prisma, Session, Users } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/modules/users/users.service';
-import { AvailableUserDto, RegisterUserDto } from './auth.dto';
+import { AvailableUserDto, RegisterUserDto, VerifiedEmail, VerifyingUserEmail } from './auth.dto';
 import { TokenService } from './token.service';
+import { EmailService } from 'src/email/emails.service';
 const argon2 = require('argon2');
+
+const MINIMUM_RETRY_TIME = 60_000
+const MAXINUM_AVAILABLE_TIME = 5 * 60_000
+
 
 @Injectable()
 export class AuthService {
@@ -18,7 +23,8 @@ export class AuthService {
     private readonly userService: UsersService,
     private readonly prisma: PrismaService,
     private readonly tokenService: TokenService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly emailService: EmailService
   ) { }
 
   // validator user
@@ -140,5 +146,93 @@ export class AuthService {
       '@timestamp': new Date().toISOString(),
     }
   }
+
+  async verifyingEmail(data: VerifyingUserEmail){
+    // check available email
+    const user = await this.checkAvailableUserByEmail(data.email)
+
+    if(user.isActive){
+      throw new ConflictException('Email already verified')
+    }
+
+    if(user.createdAt.getTime() + MINIMUM_RETRY_TIME > Date.now()){
+      throw new BadRequestException('Pleas wait 1 minutes for your request')
+    }
+
+    // generate token verify (hex)
+    const token = randomBytes(3).toString('hex')
+
+    // upsert , if token valailable update new token , if token havent created ->> create new token
+    await this.prisma.verificationCode.upsert({
+      where: { id: { type: 'VERIFY_EMAIL', userId: user.id } },
+      update: {
+        code: token,
+        expiresAt: new Date(Date.now() + MAXINUM_AVAILABLE_TIME)
+      },
+      create: {
+        type: 'VERIFY_EMAIL',
+        userId: user.id,
+        code: token,
+        expiresAt: new Date(Date.now() + MAXINUM_AVAILABLE_TIME)
+      }
+    })
+
+    // send verificaton email
+    await this.emailService.sendVerificationEmail(data.email,token)
+
+      return{
+        message: 'Vetification email sent',
+        '@timestamp': new Date().toISOString(),
+      }
+    }
+
+    async verifiedEmail(data: VerifiedEmail){
+      const user = await this.checkAvailableUserByEmail(data.email)
+
+      const auth = await this.prisma.verificationCode.findUnique({
+        where: { id: { type: 'VERIFY_EMAIL', userId: user.id }}
+      })
+
+      if(auth){
+        if(auth.code !== data.code){
+          throw new ConflictException('Invalid code')
+        }
+
+        if(auth.expiresAt < new Date()){
+          throw new ConflictException('Code is expried')
+        }
+      }
+
+      const userAfterVerified = await this.prisma.users.update({
+        where: { id: user.id },
+        data: {
+          isActive: true,
+          verificationCodes: { delete: { id: { type: 'VERIFY_EMAIL', userId: user.id }}}
+        }
+      })
+
+      return {
+        message: 'Email verified',
+        '@timestamp': new Date().toISOString()
+      }
+    }
+
+    async resetedPassword(data: VerifyingUserEmail){
+      const user = await this.checkAvailableUserByEmail(data.email)
+      const generatedPassword = await this.userService.edit(data)
+      return this.emailService.sendResetPassword(data.email,generatedPassword)
+    }
+
+    async checkAvailableUserByEmail(email: string){
+      const user = await this.prisma.users.findUnique({
+        where: { email: email }
+      })
+
+      if(!user){
+        throw new NotFoundException('User not found')
+      }
+
+      return user
+    }
 
 }

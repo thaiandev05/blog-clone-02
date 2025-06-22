@@ -12,10 +12,18 @@ export class IsUniqueEmail implements ValidatorConstraintInterface {
   }
 }
 
-export class AvailableUserDto{
+export class VerifyingUserEmail{
   @IsEmail({}, { message: 'Email is not accepted' })
   @IsNotEmpty({ message: 'Email is not empty' })
   email: string;
+}
+
+export class VerifiedEmail extends VerifyingUserEmail{
+  @IsNotEmpty({ message: 'Code is not empty'})
+  code: string
+}
+
+export class AvailableUserDto extends VerifyingUserEmail{
   @IsNotEmpty({ message: 'Password is not empty' })  
   password: string; 
 }
