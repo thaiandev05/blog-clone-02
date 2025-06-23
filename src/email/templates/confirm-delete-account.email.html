@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" style="margin: 0; padding: 0">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Confirm Account Deletion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      a.button {
+        background-color: #ef4444;
+        color: #ffffff !important;
+        padding: 12px 24px;
+        text-decoration: none;
+        border-radius: 6px;
+        display: inline-block;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      a.button:hover {
+        background-color: #b91c1c;
+      }
+
+      .container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        max-width: 600px;
+        margin: auto;
+        padding: 32px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #888888;
+        margin-top: 32px;
+      }
+    </style>
+  </head>
+  <body style="background-color: #f4f4f5; margin: 0; padding: 40px 0">
+    <div class="container">
+      <h2 style="color: #b91c1c">Confirm Account Deletion</h2>
+      <p style="color: #374151">
+        Hello, you have requested to delete your account. This action is <b>irreversible</b> and all related data will be permanently deleted.
+      </p>
+      <p style="color: #ef4444; font-weight: 600;">Please confirm that you really want to delete your account:</p>
+      <p style="text-align: center; margin: 32px 0">
+        <a href="{{CONFIRM_DELETE_LINK}}" class="button">Confirm Account Deletion</a>
+      </p>
+      <p style="color: #6b7280">If you did not make this request, please ignore this email and your account will not be deleted.</p>
+      <div class="footer">&copy; 2025 Your Company. All rights reserved.</div>
+    </div>
+  </body>
+</html>

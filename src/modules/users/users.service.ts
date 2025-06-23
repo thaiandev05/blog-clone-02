@@ -43,9 +43,7 @@ export class UsersService {
 
     await this.prisma.users.update({
       where: { email: data.email },
-      data: {
-        password: hasdedPassword,
-      }
+      data: { password: hasdedPassword }
     })
 
     return passwordGenerated
@@ -53,9 +51,7 @@ export class UsersService {
 
   async findEmail(email: String) {
     return await this.prisma.users.findUnique({
-      where: {
-        email: email.toString()
-      }
+      where: { email: email.toString() }
     })
   }
 

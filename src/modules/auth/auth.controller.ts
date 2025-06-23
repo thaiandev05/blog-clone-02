@@ -53,6 +53,16 @@ export class AuthController {
     return await this.authService.verifiedEmail(data)
   }
 
+  @Post('send-deletedEmail')
+  async deletedEmail(@Body()data: VerifyingUserEmail){
+    return await this.authService.deletingEmail(data)
+  }
+
+  @Get('deleted-email/confirm')
+  async deletedAccount(@Query()data: VerifiedEmail){
+    return await this.authService.deletedAccount(data)
+  }
+
   @Post('reseted-password')
   async resetPassword(@Body()data: VerifyingUserEmail){
     return await this.authService.resetedPassword(data)

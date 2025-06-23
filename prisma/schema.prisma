@@ -38,9 +38,11 @@ model Users {
   
   // Quan hệ: Một User có thể có nhiều Session (đăng nhập từ nhiều thiết bị)
   sessions         Session[]
+  posts             Post[]
   // Quan hệ: Một User có thể có nhiều mã xác thực (ví dụ: xác thực email, đổi mật khẩu,...)
   verificationCodes VerificationCode[]
 
+  isDeleted Boolean @default(false)
   deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -76,4 +78,28 @@ model VerificationCode{
   // Ví dụ: User "A" chỉ có thể có 1 mã `VERIFY_EMAIL` đang hoạt động.
   // Điều này giúp việc tạo/cập nhật (upsert) mã rất dễ dàng.
   @@unique([userId, type], name: "id")
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  title     String
+  content   String?
+  published Boolean  @default(false)
+
+  // Quan hệ với User (Tác giả)
+  authorId String @db.Uuid // Thêm @db.Uuid để nhất quán với Users.id
+  author   Users     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Sửa lỗi và tối ưu hóa Soft-Delete
+  // Chỉ cần một trường `deletedAt`. Nếu nó là null, bài viết chưa bị xóa.
+  // Loại bỏ trường `isDeleted` thừa thãi và sửa lỗi dùng `@updatedAt` ở đây.
+  deletedAt DateTime?
+
+  // Thêm index cho khóa ngoại để tăng tốc độ truy vấn
+  // Ví dụ: khi tìm tất cả bài viết của một tác giả.
+  @@index([authorId])
 }

@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import config from './config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TaskService } from './modules/tasks/tasks.service';
 
 @Module({
   imports: [UsersModule, PrismaModule, AuthModule,
@@ -13,9 +15,11 @@ import config from './config';
       isGlobal: true,
       envFilePath: ['.env', '.env.dev', '.env.prd'],
       load: config,
+      
     }),
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,TaskService],
 })
 export class AppModule { }
