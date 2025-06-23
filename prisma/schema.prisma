@@ -41,7 +41,7 @@ model Users {
   posts             Post[]
   // Quan hệ: Một User có thể có nhiều mã xác thực (ví dụ: xác thực email, đổi mật khẩu,...)
   verificationCodes VerificationCode[]
-
+  reStoreAt DateTime  @updatedAt
   isDeleted Boolean @default(false)
   deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
   createdAt DateTime  @default(now())
@@ -98,7 +98,7 @@ model Post {
   // Chỉ cần một trường `deletedAt`. Nếu nó là null, bài viết chưa bị xóa.
   // Loại bỏ trường `isDeleted` thừa thãi và sửa lỗi dùng `@updatedAt` ở đây.
   deletedAt DateTime?
-
+  isDelete Boolean @default(false)
   // Thêm index cho khóa ngoại để tăng tốc độ truy vấn
   // Ví dụ: khi tìm tất cả bài viết của một tác giả.
   @@index([authorId])

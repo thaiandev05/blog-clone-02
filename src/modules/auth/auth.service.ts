@@ -29,14 +29,14 @@ export class AuthService {
   // validator user
   async validateUser(email: string, pass: string) {
     const user = await this.prisma.users.findFirst({
-      where: { email: email },
+      where: { email: email , isDeleted: false},
       omit: {
         password: false
       }
     })
 
     if (!user) {
-      throw new NotFoundException("user not found");
+      throw new NotFoundException("user not found or Account is on deleted status , if u wanna use my service , please Reacvite your account");
     }
 
     const isMatch = await argon2.verify(user.password, pass)
@@ -49,6 +49,15 @@ export class AuthService {
   }
 
   async register(userData: RegisterUserDto) {
+
+    const exitedUser  = await this.prisma.users.findUnique({
+      where: {email: userData.email}
+    })
+
+    if(exitedUser){
+      throw new BadRequestException('User is exited or email is using other account')
+    }
+
     await this.prisma.users.create({
       data: {
         email: userData.email,
@@ -302,5 +311,43 @@ export class AuthService {
 
     return user
   }
+
+  // async undoDeleted(data: AvailableUserDto){
+  //   const exitedUser = await this.prisma.users.findUnique({
+  //     where: { email: data.email },
+  //     omit:  {  password: false  }
+  //   })
+
+  //   if (!exitedUser) {
+  //     throw new NotFoundException('User not found')
+  //   }
+
+  //   const isMatch = argon2.verify(exitedUser.password,data.password)
+
+  //   if(!isMatch){
+  //     throw new BadRequestException('Password is not matched')
+  //   }
+
+  //   const newUser = this.prisma.users.update({
+  //     where: { id: exitedUser.id },
+  //     data: {
+  //       isDeleted: false,
+  //       reStoreAt: new Date()
+  //     },
+  //   })
+    
+
+  //   return{
+  //     message: 'Restore your account successfully',
+  //     newUser,
+  //     '@timestamp': new Date().toISOString()
+  //   }
+
+
+  // }
+
+  async getListTest(){
+    return this.prisma.users.findMany()
+}
 
 }

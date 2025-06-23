@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { Users } from 'generated/prisma';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
@@ -66,5 +66,15 @@ export class AuthController {
   @Post('reseted-password')
   async resetPassword(@Body()data: VerifyingUserEmail){
     return await this.authService.resetedPassword(data)
+  }
+
+  // @Patch('undoDeleted-account')
+  // async undoDeletedAccount(@Body()data: AvailableUserDto){
+  //   return await this.authService.undoDeleted(data)
+  // }
+
+  @Get('getList')
+  async getList(){
+    return await this.authService.getListTest()
   }
 }
