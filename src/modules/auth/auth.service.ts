@@ -312,39 +312,40 @@ export class AuthService {
     return user
   }
 
-  // async undoDeleted(data: AvailableUserDto){
-  //   const exitedUser = await this.prisma.users.findUnique({
-  //     where: { email: data.email },
-  //     omit:  {  password: false  }
-  //   })
+  async undoDeleted(data: AvailableUserDto){
+    const exitedUser = await this.prisma.users.findUnique({
+      where: { email: data.email },
+      omit:  {  password: false  }
+    })
 
-  //   if (!exitedUser) {
-  //     throw new NotFoundException('User not found')
-  //   }
+    if (!exitedUser) {
+      throw new NotFoundException('User not found')
+    }
 
-  //   const isMatch = argon2.verify(exitedUser.password,data.password)
+    const isMatch = argon2.verify(exitedUser.password,data.password)
 
-  //   if(!isMatch){
-  //     throw new BadRequestException('Password is not matched')
-  //   }
+    if(!isMatch){
+      throw new BadRequestException('Password is not matched')
+    }
 
-  //   const newUser = this.prisma.users.update({
-  //     where: { id: exitedUser.id },
-  //     data: {
-  //       isDeleted: false,
-  //       reStoreAt: new Date()
-  //     },
-  //   })
+    const newUser = await this.prisma.users.update({
+      where: { id: exitedUser.id },
+      data: {
+        isDeleted: false,
+        reStoreAt: new Date()
+      },
+    })
     
+    await this.emailService.sendNotificationUndoDeletedAccount(exitedUser.email)
 
-  //   return{
-  //     message: 'Restore your account successfully',
-  //     newUser,
-  //     '@timestamp': new Date().toISOString()
-  //   }
+    return{
+      message: 'Restore your account successfully',
+      newUser,
+      '@timestamp': new Date().toISOString()
+    }
 
 
-  // }
+  }
 
   async getListTest(){
     return this.prisma.users.findMany()

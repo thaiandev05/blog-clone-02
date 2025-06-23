@@ -75,4 +75,21 @@ export class EmailService{
         })
       }
 
+    async sendNotificationUndoDeletedAccount(email: string) {
+      const templatePath = join(__dirname, 'templates', 'undo-delete-account.email.html');
+      let templateHtml: string;
+      try {
+        templateHtml = readFileSync(templatePath, 'utf8');
+      } catch (error) {
+        console.error(`Failed to read email template at ${templatePath}:`, error);
+        throw new Error('Could not load undo delete account email template');
+      }
+      const html = templateHtml;
+      await this.mailService.sendMail({
+        to: email,
+        subject: 'Your account has been restored',
+        html,
+      });
+    }
+
 }

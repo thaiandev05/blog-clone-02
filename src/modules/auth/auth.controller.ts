@@ -68,10 +68,10 @@ export class AuthController {
     return await this.authService.resetedPassword(data)
   }
 
-  // @Patch('undoDeleted-account')
-  // async undoDeletedAccount(@Body()data: AvailableUserDto){
-  //   return await this.authService.undoDeleted(data)
-  // }
+  @Patch('undoDeleted-account')
+  async undoDeletedAccount(@Body()data: AvailableUserDto){
+    return await this.authService.undoDeleted(data)
+  }
 
   @Get('getList')
   async getList(){
