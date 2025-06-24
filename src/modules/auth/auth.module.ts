@@ -22,7 +22,6 @@ import { EmailModule } from 'src/email/emails.module';
     TokenService,
     AuthCookieStrategy,
     ConfigService,
-    
   ],
   controllers: [AuthController],
   imports: [
@@ -33,6 +32,7 @@ import { EmailModule } from 'src/email/emails.module';
       secret: process.env.JWT_SECRET,// secret key
       signOptions: {expiresIn: '3600s'}// time exprired
     })
-  ]
+  ],
+  exports: [AuthService]
 })
 export class AuthModule {}

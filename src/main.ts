@@ -24,5 +24,11 @@ async function bootstrap() {
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT ?? 3000);
+
+  app.enableCors({
+    credentials: true, // <- Cho phép gửi cookie
+  });
+  
+
 }
 bootstrap();

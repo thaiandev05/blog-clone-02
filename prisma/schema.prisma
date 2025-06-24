@@ -87,7 +87,7 @@ model Post {
   published Boolean  @default(false)
 
   // Quan hệ với User (Tác giả)
-  authorId String @db.Uuid // Thêm @db.Uuid để nhất quán với Users.id
+  authorId String    @db.Uuid // Thêm @db.Uuid để nhất quán với Users.id
   author   Users     @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   // Timestamps

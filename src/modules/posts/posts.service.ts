@@ -1,5 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
+import { CreatePost } from "./post.dto";
+import { Response } from "express";
+import { Users } from "generated/prisma";
 
 @Injectable()
 export class PostService{
@@ -8,13 +11,14 @@ export class PostService{
         private readonly prisma: PrismaService
     ){}
 
-    async createPost(data: any){
+    async createPost(user: Users,data: CreatePost,res: Response, session_id?: string){
+
         const post = await this.prisma.post.create({
             data: {
                 title: data.title,
                 content: data.content,
                 published: data.published,
-                authorId: data.user.id,
+                authorId: user.id
             }
         })
 
@@ -24,6 +28,15 @@ export class PostService{
             '@timestamp': new Date().toISOString()
         }
 
+    }
+
+
+
+
+
+    // test
+    async getListPost(){
+        return await this.prisma.post.findMany()
     }
 
 }
