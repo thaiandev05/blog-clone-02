@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreatePost, FindPost } from "./post.dto";
+import { CreatePost, EditPost, FindPost } from "./post.dto";
 import { Response } from "express";
 import { Users } from "generated/prisma";
 
@@ -37,16 +37,10 @@ export class PostService {
             where: {
                 OR: [
                     {
-                        id: {
-                            contains: keyword,
-                            mode: 'insensitive'
-                        }
+                        id: { contains: keyword, mode: 'insensitive' }
                     },
                     {
-                        title: {
-                            contains: keyword,
-                            mode: 'insensitive'
-                        },
+                        title: { contains: keyword, mode: 'insensitive' },
                     },
                 ],
             }
@@ -58,6 +52,36 @@ export class PostService {
 
         return {
             exitedPost
+        }
+    }
+
+    async editPost(data: EditPost){
+        console.log(data)
+        const author = await this.prisma.post.findFirst({
+            where: {
+              id: data.id,
+              authorId: data.authorId,
+            },
+        })
+
+        if(!author){
+            throw new BadRequestException('You are not author')
+        }
+
+        const newPost = await this.prisma.post.update({
+            where: { id: data.id },
+            data: {
+                title: data.title,
+                content: data.content,
+                published: data.published,
+                updatedAt: new Date()
+            }
+        })
+
+        return{
+            message: 'Edit successful',
+            newPost,
+            '@timestamp': new Date().toISOString()
         }
     }
 
