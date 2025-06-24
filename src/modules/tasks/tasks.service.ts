@@ -19,5 +19,16 @@ export class TaskService{
           },
         },
       })
+
+
+      this.prisma.post.deleteMany({
+        where: {
+          isDelete: true,
+          deletedAt: {
+            lt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),// delete user after 15 days
+          },
+        },
+      })
     }
+
 }

@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
-import { CreatePost, EditPost, FindPost } from "./post.dto";
+import { Body, Controller, Delete, Get, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
 import { PostService } from "./posts.service";
 import { Response } from "express";
 import { AuthCookieGuard } from "src/guards/auth-cookie.guard";
@@ -26,6 +26,12 @@ export class PostController {
     async editPost(@Body()data: EditPost){
         return await this.postService.editPost(data)
     }
+
+    @Patch('delete-post')
+    async deletePost(@Body()data: DeletePost){
+        return await this.postService.deletingPost(data)
+    }
+
 
     // test
     @Get('getList')

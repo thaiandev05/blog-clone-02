@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreatePost, EditPost, FindPost } from "./post.dto";
+import { CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
 import { Response } from "express";
 import { Users } from "generated/prisma";
 
@@ -56,7 +56,6 @@ export class PostService {
     }
 
     async editPost(data: EditPost){
-        console.log(data)
         const author = await this.prisma.post.findFirst({
             where: {
               id: data.id,
@@ -85,6 +84,31 @@ export class PostService {
         }
     }
 
+    async deletingPost(data: DeletePost){
+        const author = await this.prisma.post.findFirst({
+            where: {
+              id: data.id,
+              authorId: data.authorId,
+            },
+        })
+
+        if(!author){
+            throw new BadRequestException('You are not author')
+        }
+        const newPost = await this.prisma.post.update({
+            where: { id: data.id },
+            data: {
+                isDelete: true,
+                deletedAt: new Date()
+            }
+        })
+
+        return{
+            message: 'Deleted successful',
+            newPost,
+            '@timestamp': new Date().toISOString()
+        }
+    }
 
     // test
     async getListPost() {
