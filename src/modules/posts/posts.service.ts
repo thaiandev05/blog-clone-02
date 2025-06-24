@@ -1,17 +1,17 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreatePost } from "./post.dto";
+import { CreatePost, FindPost } from "./post.dto";
 import { Response } from "express";
 import { Users } from "generated/prisma";
 
 @Injectable()
-export class PostService{
+export class PostService {
 
     constructor(
         private readonly prisma: PrismaService
-    ){}
+    ) { }
 
-    async createPost(user: Users,data: CreatePost,res: Response, session_id?: string){
+    async createPost(user: Users, data: CreatePost, res: Response, session_id?: string) {
 
         const post = await this.prisma.post.create({
             data: {
@@ -22,7 +22,7 @@ export class PostService{
             }
         })
 
-        return{
+        return {
             message: 'Create post successful',
             data,
             '@timestamp': new Date().toISOString()
@@ -31,11 +31,39 @@ export class PostService{
     }
 
 
+    async getDeltailPost(data: FindPost) {
+        const { keyword } = data
+        const exitedPost = await this.prisma.post.findMany({
+            where: {
+                OR: [
+                    {
+                        id: {
+                            contains: keyword,
+                            mode: 'insensitive'
+                        }
+                    },
+                    {
+                        title: {
+                            contains: keyword,
+                            mode: 'insensitive'
+                        },
+                    },
+                ],
+            }
+        })
 
+        if (!exitedPost || exitedPost.length === 0) {
+            throw new NotFoundException('No result is matched')
+        }
+
+        return {
+            exitedPost
+        }
+    }
 
 
     // test
-    async getListPost(){
+    async getListPost() {
         return await this.prisma.post.findMany()
     }
 

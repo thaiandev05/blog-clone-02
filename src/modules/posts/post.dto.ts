@@ -7,3 +7,8 @@ export class CreatePost{
     content: string
     published: boolean
 }
+
+export class FindPost{
+    @IsNotEmpty({message: 'Field is not empty'})
+    keyword: string
+}
