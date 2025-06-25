@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
-import { CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
+import { AuthorPost, CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
 import { PostService } from "./posts.service";
 import { Response } from "express";
 import { AuthCookieGuard } from "src/guards/auth-cookie.guard";
@@ -32,10 +32,14 @@ export class PostController {
         return await this.postService.deletingPost(data)
     }
 
+    @Get('get-list-post')
+    async loadingAllPost(@Query()data: AuthorPost){
+        return this.postService.loadingAllPost(data)
+    }
 
     // test
     @Get('getList')
     async getList(){
-        return this.postService.getListPost()
+        return this.postService.loadingUserPost()
     }
 }

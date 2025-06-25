@@ -20,7 +20,6 @@ export class TaskService{
         },
       })
 
-
       this.prisma.post.deleteMany({
         where: {
           isDelete: true,

@@ -1,15 +1,29 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
-import { CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
+import { AuthorPost, CreatePost, DeletePost, EditPost, FindPost } from "./post.dto";
 import { Response } from "express";
-import { Users } from "generated/prisma";
+import { Post, Users } from "generated/prisma";
 
 @Injectable()
 export class PostService {
 
     constructor(
         private readonly prisma: PrismaService
-    ) { }
+    ) {}
+
+    async loadingAllPost(data: AuthorPost){
+
+        const list: Post[] = await this.prisma.post.findMany({
+            where: { authorId: data.authorId }
+        })
+
+        if(list.length === 0){
+            throw new NotFoundException('User have not post something yet')
+        }
+        return list
+        
+    }
+
 
     async createPost(user: Users, data: CreatePost, res: Response, session_id?: string) {
 
@@ -110,8 +124,7 @@ export class PostService {
         }
     }
 
-    // test
-    async getListPost() {
+    async loadingUserPost(){
         return await this.prisma.post.findMany()
     }
 

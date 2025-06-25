@@ -43,7 +43,7 @@ export class AuthController {
     return await this.authService.logout(req.user, res,session_id)
   }
 
-  @Post('send-verifyingEmail')
+  @Post('send-verifying-Email')
   async sendVerificationEmail(@Body()data: VerifyingUserEmail){
     return await this.authService.verifyingEmail(data)
   }
@@ -53,7 +53,7 @@ export class AuthController {
     return await this.authService.verifiedEmail(data)
   }
 
-  @Post('send-deletedEmail')
+  @Post('send-deleted-Email')
   async deletedEmail(@Body()data: VerifyingUserEmail){
     return await this.authService.deletingEmail(data)
   }

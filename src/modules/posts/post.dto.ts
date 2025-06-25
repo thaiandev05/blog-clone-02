@@ -13,6 +13,11 @@ export class FindPost{
     keyword: string
 }
 
+export class AuthorPost{
+    @IsNotEmpty({message: 'Field is not empty'})
+    authorId: string
+}
+
 export class EditPost extends CreatePost{
     authorId: string
     id: string
@@ -22,3 +27,4 @@ export class DeletePost{
     authorId: string
     id: string
 }
+
