@@ -30,22 +30,27 @@ enum VerificationType {
 model Users {
   id       String   @id @default(uuid()) @db.Uuid
   email    String   @unique
-  password String // Luôn lưu trữ mật khẩu đã được băm (hashed)
+  isActive Boolean  @default(false) 
+  password String 
   name     String?
-
-  role     UserRole @default(USER) // Thêm vai trò để quản lý quyền hạn
-  isActive Boolean  @default(false) // Xác định tài khoản đã được kích hoạt hay chưa
-  
-  // Quan hệ: Một User có thể có nhiều Session (đăng nhập từ nhiều thiết bị)
-  sessions         Session[]
-  posts             Post[]
-  // Quan hệ: Một User có thể có nhiều mã xác thực (ví dụ: xác thực email, đổi mật khẩu,...)
-  verificationCodes VerificationCode[]
+  role     UserRole @default(USER) 
   reStoreAt DateTime  @updatedAt
   isDeleted Boolean @default(false)
   deletedAt DateTime? // Dùng cho soft-delete (xóa mềm)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  displayName String?
+  provider      String? 
+  providerId    String?
+  avatar        String? @db.Text
+  emailVerified Boolean? 
+  givenName     String? 
+  familyName    String?
+
+  sessions         Session[]
+  posts             Post[]
+  verificationCodes VerificationCode[]
 }
 
 // Model Session chuyên quản lý Refresh Token

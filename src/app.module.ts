@@ -9,6 +9,7 @@ import config from './config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TaskService } from './modules/tasks/tasks.service';
 import { PostModule } from './modules/posts/posts.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [UsersModule, PrismaModule, AuthModule,PostModule,
@@ -16,9 +17,9 @@ import { PostModule } from './modules/posts/posts.module';
       isGlobal: true,
       envFilePath: ['.env', '.env.dev', '.env.prd'],
       load: config,
-      
     }),
     ScheduleModule.forRoot(),
+    PassportModule.register({ session: true }),
   ],
   controllers: [AppController],
   providers: [AppService,TaskService],

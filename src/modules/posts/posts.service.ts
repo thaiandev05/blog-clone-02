@@ -21,7 +21,6 @@ export class PostService {
             throw new NotFoundException('User have not post something yet')
         }
         return list
-        
     }
 
 
@@ -65,7 +64,8 @@ export class PostService {
         }
 
         return {
-            exitedPost
+            exitedPost,
+            '@timestamp': new Date().toISOString()
         }
     }
 

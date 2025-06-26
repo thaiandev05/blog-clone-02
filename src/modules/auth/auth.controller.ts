@@ -7,12 +7,16 @@ import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { Response } from 'express'
 import { AuthCookieGuard } from 'src/guards/auth-cookie.guard';
+import { GoogleGuard } from 'src/guards/google-auth.guard';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { SocialService } from './social.service';
 @Controller('auth')
 export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
-    private readonly tokenService: TokenService
+    private readonly tokenService: TokenService,
+    private readonly socialService: SocialService
   ){}
 
   @Post('register')
@@ -76,5 +80,27 @@ export class AuthController {
   @Get('getList')
   async getList(){
     return await this.authService.getListTest()
+  }
+
+  @Get('google/login')
+  @UseGuards(GoogleGuard)
+  handleLogin() {
+    return { msg: 'Google Authentication' };
+  }
+
+  // api/auth/google/redirect
+  @Get('google/callback')
+  @UseGuards(GoogleGuard)
+  handleRedirect() {
+    return { msg: 'OK' };
+  }
+
+  @Get('status')
+  user(@Req() request: Request) {
+    if (request) {
+      return { msg: 'Authenticated' };
+    } else {
+      return { msg: 'Not Authenticated' };
+    }
   }
 }

@@ -4,11 +4,11 @@ import { CookieParseOptions } from 'cookie-parser';
 import { randomBytes, randomUUID } from 'crypto';
 import { Response } from 'express';
 import { Prisma, Session, Users } from 'generated/prisma';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { EmailService } from 'src/email/emails.service';
 import { UsersService } from 'src/modules/users/users.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { AvailableUserDto, RegisterUserDto, VerifiedEmail, VerifyingUserEmail } from './auth.dto';
 import { TokenService } from './token.service';
-import { EmailService } from 'src/email/emails.service';
 const argon2 = require('argon2');
 
 const MINIMUM_RETRY_TIME = 60_000
@@ -29,7 +29,7 @@ export class AuthService {
   // validator user
   async validateUser(email: string, pass: string) {
     const user = await this.prisma.users.findFirst({
-      where: { email: email , isDeleted: false},
+      where: { email: email, isDeleted: false },
       omit: {
         password: false
       }
@@ -50,11 +50,11 @@ export class AuthService {
 
   async register(userData: RegisterUserDto) {
 
-    const exitedUser  = await this.prisma.users.findUnique({
-      where: {email: userData.email}
+    const exitedUser = await this.prisma.users.findUnique({
+      where: { email: userData.email }
     })
 
-    if(exitedUser){
+    if (exitedUser) {
       throw new BadRequestException('User is exited or email is using other account')
     }
 
@@ -67,7 +67,8 @@ export class AuthService {
     })
     return {
       message: 'Register successfully',
-      data: userData
+      data: userData,
+      '@timestamp': new Date().toISOString()
     }
   }
 
@@ -232,11 +233,11 @@ export class AuthService {
 
   }
 
-  async deletedAccount(data: VerifiedEmail){
-    const user  = await this.checkAvailableUserByEmail(data.email)
+  async deletedAccount(data: VerifiedEmail) {
+    const user = await this.checkAvailableUserByEmail(data.email)
 
     const auth = await this.prisma.verificationCode.findUnique({
-      where: { id: {type: 'DELETE_ACCOUNT', userId: user.id }}
+      where: { id: { type: 'DELETE_ACCOUNT', userId: user.id } }
     })
 
     if (auth) {
@@ -257,7 +258,7 @@ export class AuthService {
       }
     })
 
-    return{
+    return {
       message: 'Delete account successfully , after 15 days your account is completely deleted',
       '@timestamp': new Date().toISOString()
     }
@@ -312,19 +313,19 @@ export class AuthService {
     return user
   }
 
-  async undoDeleted(data: AvailableUserDto){
+  async undoDeleted(data: AvailableUserDto) {
     const exitedUser = await this.prisma.users.findUnique({
       where: { email: data.email },
-      omit:  {  password: false  }
+      omit: { password: false }
     })
 
     if (!exitedUser) {
       throw new NotFoundException('User not found')
     }
 
-    const isMatch = argon2.verify(exitedUser.password,data.password)
+    const isMatch = argon2.verify(exitedUser.password, data.password)
 
-    if(!isMatch){
+    if (!isMatch) {
       throw new BadRequestException('Password is not matched')
     }
 
@@ -335,20 +336,25 @@ export class AuthService {
         reStoreAt: new Date()
       },
     })
-    
+
     await this.emailService.sendNotificationUndoDeletedAccount(exitedUser.email)
 
-    return{
+    return {
       message: 'Restore your account successfully',
       newUser,
       '@timestamp': new Date().toISOString()
     }
 
-
   }
 
-  async getListTest(){
+  async validateUserOauh(details: any){
+    const user = await this.prisma
+  }
+
+
+  async getListTest() {
     return this.prisma.users.findMany()
-}
+  }
+
 
 }

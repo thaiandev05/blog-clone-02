@@ -5,6 +5,7 @@ ignoredBuiltDependencies:
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@prisma/client'
+  - '@scarf/scarf'
   - '@swc/core'
   - argon2
   - prisma

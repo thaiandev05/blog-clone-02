@@ -92,4 +92,24 @@ export class EmailService{
       });
     }
 
+    async sendSocialLoginPassword(email: string,password: string){
+      const templatePath = join(__dirname, 'templates', 'password-social-login.email.html')
+
+          let templateHtml: string
+          try {
+            templateHtml = readFileSync(templatePath, 'utf8')
+          } catch (error) {
+            console.error(`Failed to read email template at ${templatePath}:`, error)
+            throw new Error('Could not load reset email template')
+          }
+
+          const html = templateHtml.replace('{{AUTO_GENERATED_PASSWORD}}', password)
+
+          await this.mailService.sendMail({
+            to: email,
+            subject: 'Email Social Password',
+            html
+          })
+    }
+
 }

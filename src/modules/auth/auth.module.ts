@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { EmailService } from 'src/email/emails.service';
@@ -12,6 +12,9 @@ import { IsUniqueEmail } from './auth.dto';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { EmailModule } from 'src/email/emails.module';
+import { GoogleStrategy } from 'src/passports/googleStrategy';
+import googleConfig from 'src/config/google.config';
+import { SocialService } from './social.service';
 
 @Module({
   providers: [
@@ -22,6 +25,8 @@ import { EmailModule } from 'src/email/emails.module';
     TokenService,
     AuthCookieStrategy,
     ConfigService,
+    GoogleStrategy,
+    SocialService
   ],
   controllers: [AuthController],
   imports: [
