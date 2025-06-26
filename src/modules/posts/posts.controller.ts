@@ -12,34 +12,28 @@ export class PostController {
     ){}
 
     @UseGuards(AuthCookieGuard)
-    @Post('create-post')
+    @Post('create/post')
     async createPost(@Req() req,@Body() data: CreatePost,@Res({ passthrough: true })res: Response, session_id: string){
         return await this.postService.createPost(req.user,data,res,session_id)
     }
 
-    @Get('post-detail')
+    @Get('post/detail')
     async findPost(@Query()data: FindPost){
         return this.postService.getDeltailPost(data)
     }
 
-    @Patch('edit-post')
+    @Patch('edit/post')
     async editPost(@Body()data: EditPost){
         return await this.postService.editPost(data)
     }
 
-    @Patch('delete-post')
+    @Patch('delete/post')
     async deletePost(@Body()data: DeletePost){
         return await this.postService.deletingPost(data)
     }
 
-    @Get('get-list-post')
+    @Get('get/list/post')
     async loadingAllPost(@Query()data: AuthorPost){
         return this.postService.loadingAllPost(data)
-    }
-
-    // test
-    @Get('getList')
-    async getList(){
-        return this.postService.loadingUserPost()
     }
 }

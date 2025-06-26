@@ -1,22 +1,19 @@
 import { Body, Controller, Delete, Get, Patch, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
+import { Response } from 'express';
 import { Users } from 'generated/prisma';
+import { AuthCookieGuard } from 'src/guards/auth-cookie.guard';
+import { GoogleGuard } from 'src/guards/google-auth.guard';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { LocalAuthGuard } from 'src/guards/local-auth.guard';
 import { AvailableUserDto, VerifiedEmail, VerifyingUserEmail } from './auth.dto';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
-import { Response } from 'express'
-import { AuthCookieGuard } from 'src/guards/auth-cookie.guard';
-import { GoogleGuard } from 'src/guards/google-auth.guard';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { SocialService } from './social.service';
 @Controller('auth')
 export class AuthController {
 
   constructor(
     private readonly authService: AuthService,
     private readonly tokenService: TokenService,
-    private readonly socialService: SocialService
   ){}
 
   @Post('register')
@@ -36,7 +33,7 @@ export class AuthController {
     return req.user;
   }
 
-  @Post('refresh-token')
+  @Post('refresh/token')
   async refreshToken(@Body() body: { user: Users ,refreshToken: string }) {
     return this.tokenService.verifyRefreshToken( body.user.id, body.refreshToken);
   }
@@ -47,32 +44,32 @@ export class AuthController {
     return await this.authService.logout(req.user, res,session_id)
   }
 
-  @Post('send-verifying-Email')
+  @Post('send/verifying/Email')
   async sendVerificationEmail(@Body()data: VerifyingUserEmail){
     return await this.authService.verifyingEmail(data)
   }
 
-  @Get('verify-email/confirm')
+  @Get('verify/email/confirm')
   async verifiedEmail(@Query()data: VerifiedEmail){
     return await this.authService.verifiedEmail(data)
   }
 
-  @Post('send-deleted-Email')
+  @Post('send/deleted/Email')
   async deletedEmail(@Body()data: VerifyingUserEmail){
     return await this.authService.deletingEmail(data)
   }
 
-  @Get('deleted-email/confirm')
+  @Get('deleted/email/confirm')
   async deletedAccount(@Query()data: VerifiedEmail){
     return await this.authService.deletedAccount(data)
   }
 
-  @Post('reseted-password')
+  @Post('reseted/password')
   async resetPassword(@Body()data: VerifyingUserEmail){
     return await this.authService.resetedPassword(data)
   }
 
-  @Patch('undoDeleted-account')
+  @Patch('undoDeleted/account')
   async undoDeletedAccount(@Body()data: AvailableUserDto){
     return await this.authService.undoDeleted(data)
   }
