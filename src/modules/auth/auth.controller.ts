@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Patch, Post, Query, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { Users } from 'generated/prisma';
 import { AuthCookieGuard } from 'src/guards/auth-cookie.guard';
@@ -88,13 +88,28 @@ export class AuthController {
   // api/auth/google/redirect
   @Get('google/callback')
   @UseGuards(GoogleGuard)
-  handleRedirect() {
-    return { msg: 'OK' };
+  async handleRedirect(@Request() req, @Res({ passthrough: true }) res: Response) {
+    try {
+      if (!req.user) {
+        throw new HttpException('No user data received from Google', HttpStatus.UNAUTHORIZED);
+      }
+
+      // Create session and tokens using OAuth login
+      const result = await this.authService.oauthLogin(req.user, res);
+      
+      return result;
+    } catch (error) {
+      console.error('Google callback error:', error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException('Google authentication failed', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @Get('status')
   user(@Req() request: Request) {
-    if (request) {
+    if (request.bodyUsed) {
       return { msg: 'Authenticated' };
     } else {
       return { msg: 'Not Authenticated' };

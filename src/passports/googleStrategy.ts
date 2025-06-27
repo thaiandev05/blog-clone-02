@@ -19,14 +19,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: GoogleUser) {
-    // Bạn có thể xử lý thêm ở đây, ví dụ lưu user vào DB
-    console.log(accessToken)
-
-    console.log(refreshToken)
-
-    console.log(profile)
-    
-    const user = this.socialService.validateGoogleUser(profile)
-    return user || null
+    try {
+      // Bạn có thể xử lý thêm ở đây, ví dụ lưu user vào DB
+      console.log('Access Token:', accessToken)
+      console.log('Refresh Token:', refreshToken)
+      console.log('Profile:', profile)
+      
+      const user = await this.socialService.validateGoogleUser(profile)
+      return user || null
+    } catch (error) {
+      this.logger.error('Error validating Google user:', error)
+      throw error
+    }
   }
 }

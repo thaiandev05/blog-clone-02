@@ -63,14 +63,14 @@ export class SocialService {
           email: profile.emails[0].value,
           displayName: profile.displayName,
           password: hashedPassword,
-          emailVerified: profile.emails[0].verified,
+          emailVerified: profile.emails[0].verified,  
         }
       })
 
       await this.emailService.sendSocialLoginPassword(user.email, password)
     }
 
-    
+    return user;
   }
 
 

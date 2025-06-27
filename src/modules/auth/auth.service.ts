@@ -87,6 +87,19 @@ export class AuthService {
 
   }
 
+  async oauthLogin(user: Users, res: Response) {
+    // create session for OAuth user
+    await this.createSession(user, res)
+
+    const { password, ...userWithoutPassword } = user
+
+    return {
+      message: 'OAuth login successfully',
+      data: userWithoutPassword,
+      '@timestamp': new Date().toISOString()
+    }
+  }
+
   async getProfile(email: string) {
     const user = await this.userService.findEmail(email);
     if (!user) {
